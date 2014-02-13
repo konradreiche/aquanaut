@@ -1,5 +1,4 @@
 require "aquanaut/version"
+require "aquanaut/worker"
 
-module Aquanaut
-  # Your code goes here...
-end
+module Aquanaut; end

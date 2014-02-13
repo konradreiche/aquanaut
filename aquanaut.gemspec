@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Aquanaut::VERSION
   spec.authors       = ["Konrad Reiche"]
   spec.email         = ["konrad.reiche@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{Aquanaut creates a sitemap dynamically based on a given domain.}
+  spec.description   = %q{Aquanaut creates a sitemap dynamically based on a given domain.}
   spec.homepage      = ""
   spec.license       = "MIT"
 
