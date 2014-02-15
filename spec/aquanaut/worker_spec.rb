@@ -177,7 +177,7 @@ describe Aquanaut::Worker do
         expect(worker.links(uri)).to eq(uris)
     end
 
-    it "ignores errors raised by Mechanize when retrieving the page" do
+    it "rejects errors raised by Mechanize when retrieving the page" do
       response = { status: 500 }
       stub_request(:get, 'www.example.com').to_return(response)
 
@@ -188,7 +188,7 @@ describe Aquanaut::Worker do
       expect(worker.links(uri)).to be_empty
     end
 
-    it "ignores errors raised by Mechanize when checking the links" do
+    it "rejects errors raised by Mechanize when checking the links" do
       body = <<-BODY
       <a href="/home.html">Home</a>
       <a href="/about.html">About us</a>
@@ -226,6 +226,21 @@ describe Aquanaut::Worker do
       expect(worker.links(uri)).to be_empty
     end
 
+    it "rejects anchors with no href attribute" do
+      body = '<a>Empty</a>'
+
+      headers = { 'Content-Type' => 'text/html'}
+      response = { body: body, headers: headers }
+
+      stub_request(:get, 'www.example.com').to_return(response)
+
+      target = 'http://www.example.com'
+      worker = Aquanaut::Worker.new(target)
+      uri = URI.parse(target)
+
+      expect(worker.links(uri)).to be_empty
+    end
+
     it "rejects links that lead to a timeout" do
       body = '<a href="/timeout.html">Timeout</a>'
 
@@ -240,6 +255,26 @@ describe Aquanaut::Worker do
       uri = URI.parse(target)
 
       expect(worker.links(uri)).to be_empty
+    end
+
+    it "rejects links that have already been grabbed" do
+      body = <<-BODY
+      <a href="/home.html">Home</a>
+      <a href="/home.html">Home</a>
+      BODY
+
+      response = { body: body, headers: { 'Content-Type' => 'text/html'} }
+
+      stub_request(:get, 'www.example.com').to_return(response)
+      stub_request(:get, 'www.example.com/home.html').to_return(response)
+      stub_request(:head, 'www.example.com/home.html').to_return(response)
+
+      target = 'http://www.example.com'
+      worker = Aquanaut::Worker.new(target)
+      uri = URI.parse(target)
+
+      result = [URI.parse('http://www.example.com/home.html')]
+      expect(worker.links(uri)).to eq(result)
     end
   end
 
@@ -265,6 +300,9 @@ describe Aquanaut::Worker do
 
       visited = worker.instance_variable_get('@visited')
       expect { worker.explore }.to change { visited.size }.by(1)
+    end
+
+    it "skips already visited sites" do
     end
   end
 end

@@ -9,6 +9,8 @@ class Aquanaut::Worker
     @domain = PublicSuffix.parse(uri.host)
 
     @visited = Hash.new(false)
+    @grabbed = Hash.new(false)
+
     @agent = Mechanize.new do |agent|
       agent.open_timeout = 5
       agent.read_timeout = 5
@@ -23,6 +25,7 @@ class Aquanaut::Worker
 
       # Visit URI
       @visited[uri] = true
+      puts "Visit #{uri}"
 
       links(uri).each do |link|
         @queue.push(link)  # enqueue
@@ -40,11 +43,17 @@ class Aquanaut::Worker
     page = @agent.get(uri)
     page.links.map do |link|
       begin
+        next if link.uri.nil?
         reference = URI.join(page.uri, link.uri)
+
+        next if @grabbed[reference]
         header = @agent.head(reference)
 
         location = header.uri
         next unless internal?(location)
+
+        @grabbed[reference] = true
+        @grabbed[location] = true
         
         location
       rescue Mechanize::Error, URI::InvalidURIError,  # swallow
