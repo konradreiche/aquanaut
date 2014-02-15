@@ -70,9 +70,23 @@ describe Aquanaut::Worker do
       response = { body: body, headers: { 'Content-Type' => 'text/html'} }
       stub_request(:get, 'www.example.com').to_return(response)
 
+      stub_request(:get, 'www.example.com').to_return(response)
+
+      stub_request(:head, 'www.example.com/home.html').to_return(response)
+      stub_request(:get, 'www.example.com/home.html').to_return(response)
+
+      stub_request(:head, 'www.example.com/about.html').to_return(response)
+      stub_request(:get, 'www.example.com/about.html').to_return(response)
+
+      stub_request(:head, 'www.example.com/contact.html').to_return(response)
+      stub_request(:get, 'www.example.com/contact.html').to_return(response)
+
+      stub_request(:head, 'www.not-example.com').to_return(response)
+
       uris = ['http://www.example.com/home.html',
               'http://www.example.com/about.html',
               'http://www.example.com/contact.html']
+
       uris.map! { |uri| URI.parse(uri) }
 
       target = 'http://www.example.com'
@@ -80,6 +94,112 @@ describe Aquanaut::Worker do
 
       uri = URI.parse('http://www.example.com')
       expect(worker.links(uri)).to eq(uris)
+    end
+
+    it "returns the final location when encountering HTTP 3xx" do
+      body = '<a href="http://follow-me.com">Follow me</a>'
+      response = { body: body, headers: { 'Content-Type' => 'text/html'} }
+      stub_request(:get, 'www.example.com').to_return(response)
+    end
+
+    it "filters links that reference an external domain directly" do
+      body = <<-BODY
+      <a href="/home.html">Home</a>
+      <a href="/about.html">About us</a>
+      <a href="/contact.html">Contact</a>
+      <a href="http://www.not-example.com">Not Example</a>
+      BODY
+
+      response = { body: body, headers: { 'Content-Type' => 'text/html'} }
+
+      stub_request(:get, 'www.example.com').to_return(response)
+
+      stub_request(:head, 'www.example.com/home.html').to_return(response)
+      stub_request(:get, 'www.example.com/home.html').to_return(response)
+
+      stub_request(:head, 'www.example.com/about.html').to_return(response)
+      stub_request(:get, 'www.example.com/about.html').to_return(response)
+
+      stub_request(:head, 'www.example.com/contact.html').to_return(response)
+      stub_request(:get, 'www.example.com/contact.html').to_return(response)
+
+      stub_request(:head, 'www.not-example.com').to_return(response)
+
+      target = 'http://www.example.com'
+      worker = Aquanaut::Worker.new(target)
+
+      uris = ['http://www.example.com/home.html',
+              'http://www.example.com/about.html',
+              'http://www.example.com/contact.html']
+
+      uris.map! { |uri| URI.parse(uri) }
+
+      uri = URI.parse('http://www.example.com')
+      expect(worker.links(uri)).to eq(uris)
+    end
+
+    it "filters links that reference an external domain indirectly" do
+        body = <<-BODY
+        <a href="/home.html">Home</a>
+        <a href="/about.html">About us</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/moved.html">Moved</a>
+        BODY
+
+        other_domain = 'http://www.not-example.com'
+        response = { body: body, headers: { 'Content-Type' => 'text/html'} }
+        forward = { status: 301, headers: { 'Location' => other_domain } }
+
+        stub_request(:get, 'www.example.com').to_return(response)
+
+        stub_request(:head, 'www.example.com/home.html').to_return(response)
+        stub_request(:get, 'www.example.com/home.html').to_return(response)
+
+        stub_request(:head, 'www.example.com/about.html').to_return(response)
+        stub_request(:get, 'www.example.com/about.html').to_return(response)
+
+        stub_request(:head, 'www.example.com/contact.html').to_return(response)
+        stub_request(:get, 'www.example.com/contact.html').to_return(response)
+
+        stub_request(:head, 'www.example.com/moved.html').to_return(forward)
+        stub_request(:head, other_domain).to_return(response)
+
+        target = 'http://www.example.com'
+        worker = Aquanaut::Worker.new(target)
+
+        uris = ['http://www.example.com/home.html',
+                'http://www.example.com/about.html',
+                'http://www.example.com/contact.html']
+
+        uris.map! { |uri| URI.parse(uri) }
+
+        uri = URI.parse('http://www.example.com')
+        expect(worker.links(uri)).to eq(uris)
+    end
+  end
+
+  describe "#explore" do
+    it "starts the crawling by processing the first queue element" do
+      response = { headers: { 'Content-Type' => 'text/html'} }
+      stub_request(:get, 'www.example.com').to_return(response)
+
+      target = 'http://www.example.com'
+      worker = Aquanaut::Worker.new(target)
+      worker.explore
+
+      queue = worker.instance_variable_get('@queue')
+      expect(queue).to be_empty
+    end
+
+    it "marks visited sites" do
+      response = { headers: { 'Content-Type' => 'text/html'} }
+      stub_request(:get, 'www.example.com').to_return(response)
+
+      target = 'http://www.example.com'
+      worker = Aquanaut::Worker.new(target)
+
+      visited = worker.instance_variable_get('@visited')
+      expect { worker.explore }.to change { visited.size }.by(1)
     end
   end
 end

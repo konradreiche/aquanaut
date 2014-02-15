@@ -7,12 +7,24 @@ class Aquanaut::Worker
     uri = URI.parse(target)
     @queue = [uri]
     @domain = PublicSuffix.parse(uri.host)
+
     @agent = Mechanize.new
+    @visited = Hash.new(false)
   end
   
   # Triggers the crawling process.
   #
   def explore
+    while not @queue.empty?
+      uri = @queue.shift  # dequeue
+
+      # Visit URI
+      @visited[uri] = true
+
+      links(uri).each do |link|
+        @queue.push(link)  # enqueue
+      end
+    end
   end
 
   # Retrieves all links from a given page.
@@ -24,8 +36,14 @@ class Aquanaut::Worker
   def links(uri)
     page = @agent.get(uri)
     page.links.map do |link|
-      URI.join(page.uri, link.uri)
-    end
+      reference = URI.join(page.uri, link.uri)
+      header = @agent.head(reference)
+
+      location = header.uri
+      next unless internal?(location)
+      
+      location
+    end.compact
   end
 
   # Evaluates if a link stays in the initial domain.
