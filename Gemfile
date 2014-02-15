@@ -11,3 +11,8 @@ group :test do
   gem 'rspec'
   gem 'rspec-core'
 end
+
+group :development, :test do
+  gem 'pry'
+  gem 'pry-byebug'
+end

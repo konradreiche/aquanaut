@@ -8,8 +8,11 @@ class Aquanaut::Worker
     @queue = [uri]
     @domain = PublicSuffix.parse(uri.host)
 
-    @agent = Mechanize.new
     @visited = Hash.new(false)
+    @agent = Mechanize.new do |agent|
+      agent.open_timeout = 5
+      agent.read_timeout = 5
+    end
   end
   
   # Triggers the crawling process.
@@ -36,14 +39,21 @@ class Aquanaut::Worker
   def links(uri)
     page = @agent.get(uri)
     page.links.map do |link|
-      reference = URI.join(page.uri, link.uri)
-      header = @agent.head(reference)
+      begin
+        reference = URI.join(page.uri, link.uri)
+        header = @agent.head(reference)
 
-      location = header.uri
-      next unless internal?(location)
-      
-      location
+        location = header.uri
+        next unless internal?(location)
+        
+        location
+      rescue Mechanize::Error, URI::InvalidURIError,  # swallow
+        Net::HTTP::Persistent::Error  # Timeout
+        next
+      end
     end.compact
+  rescue Mechanize::Error
+    []  # swallow
   end
 
   # Evaluates if a link stays in the initial domain.

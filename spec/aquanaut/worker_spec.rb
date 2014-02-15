@@ -176,6 +176,71 @@ describe Aquanaut::Worker do
         uri = URI.parse('http://www.example.com')
         expect(worker.links(uri)).to eq(uris)
     end
+
+    it "ignores errors raised by Mechanize when retrieving the page" do
+      response = { status: 500 }
+      stub_request(:get, 'www.example.com').to_return(response)
+
+      target = 'http://www.example.com'
+      worker = Aquanaut::Worker.new(target)
+      uri = URI.parse(target)
+
+      expect(worker.links(uri)).to be_empty
+    end
+
+    it "ignores errors raised by Mechanize when checking the links" do
+      body = <<-BODY
+      <a href="/home.html">Home</a>
+      <a href="/about.html">About us</a>
+      BODY
+
+      headers = { 'Content-Type' => 'text/html'}
+
+      response = { body: body, headers: headers }
+      response_500 = { status: 500 }
+
+      stub_request(:get, 'www.example.com').to_return(response)
+      stub_request(:head, 'www.example.com/home.html').to_return(response)
+      stub_request(:head, 'www.example.com/about.html').to_return(response_500)
+
+      target = 'http://www.example.com'
+      worker = Aquanaut::Worker.new(target)
+      uri = URI.parse(target)
+
+      uris = [URI.parse('http://www.example.com/home.html')]
+      expect(worker.links(uri)).to eq(uris)
+    end
+
+    it "rejects invalid URIs" do
+      body = '<a href="http:invalid.com">Invalid</a>'
+
+      headers = { 'Content-Type' => 'text/html'}
+      response = { body: body, headers: headers }
+
+      stub_request(:get, 'www.example.com').to_return(response)
+
+      target = 'http://www.example.com'
+      worker = Aquanaut::Worker.new(target)
+      uri = URI.parse(target)
+
+      expect(worker.links(uri)).to be_empty
+    end
+
+    it "rejects links that lead to a timeout" do
+      body = '<a href="/timeout.html">Timeout</a>'
+
+      headers = { 'Content-Type' => 'text/html'}
+      response = { body: body, headers: headers }
+
+      stub_request(:get, 'www.example.com').to_return(response)
+      stub_request(:head, 'www.example.com/timeout.html').to_timeout
+
+      target = 'http://www.example.com'
+      worker = Aquanaut::Worker.new(target)
+      uri = URI.parse(target)
+
+      expect(worker.links(uri)).to be_empty
+    end
   end
 
   describe "#explore" do
