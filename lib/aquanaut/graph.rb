@@ -1,4 +1,5 @@
 class Aquanaut::Graph
+  include Enumerable
 
   def initialize
     @nodes = Hash.new
@@ -14,6 +15,12 @@ class Aquanaut::Graph
 
   def [](uri)
     @nodes[uri]
+  end
+
+  def each
+    @nodes.values.each do |node|
+      yield node, node.adjacency_list
+    end
   end
 
 end

@@ -1,6 +1,7 @@
 require 'aquanaut/asset_node'
 require 'aquanaut/graph'
 require 'aquanaut/page_node'
+require 'aquanaut/sitemap'
 require 'aquanaut/version'
 require 'aquanaut/worker'
 
@@ -22,7 +23,6 @@ module Aquanaut
 
       return graph
     end
-
 
   end
 end

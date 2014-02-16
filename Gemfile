@@ -5,6 +5,7 @@ gemspec
 
 gem 'public_suffix'
 gem 'mechanize'
+gem 'slim'
 gem 'webmock'
 
 group :test do

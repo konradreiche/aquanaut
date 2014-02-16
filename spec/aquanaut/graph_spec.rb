@@ -63,4 +63,27 @@ describe Aquanaut::Graph do
     end
   end
 
+  describe "#each" do
+    it "returns the node object and its adjacency list in an iteration" do
+      uri = URI.parse('http://www.example.com')
+      node = Aquanaut::PageNode.new(uri)
+
+      adjacent_uri = URI.parse('http://www.example.com/home.html')
+      adjacent_node = Aquanaut::PageNode.new(adjacent_uri)
+
+      graph = Aquanaut::Graph.new
+      graph.add_node(node)
+      graph.add_node(adjacent_node)
+      graph.add_edge(uri, adjacent_uri)
+
+      graph.each do |page_node, adjacency_list|
+        expect(page_node).to be_an_instance_of(Aquanaut::PageNode)
+        expect(page_node).to be(node)
+        expect(adjacency_list).to be(node.adjacency_list)
+        break
+      end
+
+    end
+  end
+
 end

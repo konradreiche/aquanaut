@@ -1,0 +1,16 @@
+doctype html
+html lang="en"
+  head
+    meta charset="UTF -8"
+    title Sitemap #{@domain}
+    script type="text/javascript" src="assets/js/jquery-2.1.0.min.js"
+    script type="text/javascript" src="assets/js/bootstrap.min.js"
+    script type="text/javascript" src="assets/js/d3.v3.min.js"
+    link rel="stylesheet" href="assets/css/bootstrap.min.css"
+  body   
+    ul
+      - @graph.each do |node, adjacency|
+        li = node.uri.path
+        ul
+          - adjacency.each do |node|
+            li = node.uri.path
