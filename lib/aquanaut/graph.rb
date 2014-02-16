@@ -9,7 +9,7 @@ class Aquanaut::Graph
   end
 
   def add_edge(predecessor_uri, successor_uri)
-    @nodes[predecessor_uri].add_edge(successor_uri)
+    @nodes[predecessor_uri].add_edge(@nodes[successor_uri])
   end
 
   def [](uri)

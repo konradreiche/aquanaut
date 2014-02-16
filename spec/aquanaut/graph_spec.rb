@@ -47,7 +47,7 @@ describe Aquanaut::Graph do
       graph.add_node(adjacent_node)
       graph.add_edge(uri, adjacent_uri)
 
-      expect(graph[uri].adjacency_list.first).to eq(adjacent_uri)
+      expect(graph[uri].adjacency_list.first).to eq(adjacent_node)
     end
   end
 

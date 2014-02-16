@@ -23,13 +23,14 @@ class Aquanaut::Worker
     while not @queue.empty?
       uri = @queue.shift  # dequeue
 
-      # Visit URI
       @visited[uri] = true
-      puts "Visit #{uri}"
 
-      links(uri).each do |link|
-        @queue.push(link)  # enqueue
+      links = links(uri)
+      links.each do |link|
+        @queue.push(link) unless @visited[link]  # enqueue
       end
+
+      yield uri, links if block_given?
     end
   end
 
