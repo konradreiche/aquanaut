@@ -10,6 +10,7 @@ gem 'webmock'
 group :test do
   gem 'rspec'
   gem 'rspec-core'
+  gem 'guard-rspec', require: false
 end
 
 group :development, :test do
