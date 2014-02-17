@@ -1,6 +1,10 @@
 # Aquanaut
 
+[![Build Status](https://travis-ci.org/platzhirsch/aquanaut.png)](http://travis-ci.org/platzhirsch/aquanaut)
+
 A web crawler that stays on a given domain and creates a graph representing the different pages, static assets and how they are interlinke.
+
+<img src="http://konrad-reiche.com/images/aquanaut.png">
 
 ## Installation
 
