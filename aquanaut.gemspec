@@ -19,5 +19,10 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "bundler", "~> 1.5"
-  spec.add_development_dependency "rake"
+  spec.add_development_dependency "rake", "~> 0.9"
+
+  spec.add_dependency "public_suffix", "~> 1.4", ">= 1.4.0"
+  spec.add_dependency "mechanize", "~> 2.7", ">= 2.7.3"
+  spec.add_dependency "slim", "~> 2.0", ">= 2.0.1"
+  spec.add_dependency "webmock", "~> 1.15", ">= 1.15.2"
 end
