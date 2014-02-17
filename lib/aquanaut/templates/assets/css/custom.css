@@ -1,0 +1,26 @@
+h1 {
+  margin-bottom: 2em;
+  font-size: 28px;
+}
+
+h2 {
+  margin-bottom: 0.5em;
+  font-size: 24px;
+}
+
+#graph {
+  width: 960px;
+  height: 500px;
+  border: 1px solid #ccc;
+  margin-bottom: 2em;
+}
+
+.node {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.link {
+  stroke: #999;
+  stroke-opacity: .6;
+}

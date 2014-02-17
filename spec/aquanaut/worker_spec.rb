@@ -57,7 +57,7 @@ describe Aquanaut::Worker do
       worker = Aquanaut::Worker.new(target)
 
       uri = URI.parse('http://www.example.com')
-      expect(worker.links(uri)).to be_empty
+      expect(worker.links(uri).first).to be_empty
     end
 
     it "returns a list of URIs for a page with anchor elements" do
@@ -93,7 +93,7 @@ describe Aquanaut::Worker do
       worker = Aquanaut::Worker.new(target)
 
       uri = URI.parse('http://www.example.com')
-      expect(worker.links(uri)).to eq(uris)
+      expect(worker.links(uri).first).to eq(uris)
     end
 
     it "returns the final location when encountering HTTP 3xx" do
@@ -135,7 +135,7 @@ describe Aquanaut::Worker do
       uris.map! { |uri| URI.parse(uri) }
 
       uri = URI.parse('http://www.example.com')
-      expect(worker.links(uri)).to eq(uris)
+      expect(worker.links(uri).first).to eq(uris)
     end
 
     it "filters links that reference an external domain indirectly" do
@@ -174,7 +174,7 @@ describe Aquanaut::Worker do
         uris.map! { |uri| URI.parse(uri) }
 
         uri = URI.parse('http://www.example.com')
-        expect(worker.links(uri)).to eq(uris)
+        expect(worker.links(uri).first).to eq(uris)
     end
 
     it "rejects errors raised by Mechanize when retrieving the page" do
@@ -185,7 +185,7 @@ describe Aquanaut::Worker do
       worker = Aquanaut::Worker.new(target)
       uri = URI.parse(target)
 
-      expect(worker.links(uri)).to be_empty
+      expect(worker.links(uri).first).to be_empty
     end
 
     it "rejects errors raised by Mechanize when checking the links" do
@@ -208,7 +208,7 @@ describe Aquanaut::Worker do
       uri = URI.parse(target)
 
       uris = [URI.parse('http://www.example.com/home.html')]
-      expect(worker.links(uri)).to eq(uris)
+      expect(worker.links(uri).first).to eq(uris)
     end
 
     it "rejects invalid URIs" do
@@ -223,7 +223,7 @@ describe Aquanaut::Worker do
       worker = Aquanaut::Worker.new(target)
       uri = URI.parse(target)
 
-      expect(worker.links(uri)).to be_empty
+      expect(worker.links(uri).first).to be_empty
     end
 
     it "rejects anchors with no href attribute" do
@@ -238,7 +238,7 @@ describe Aquanaut::Worker do
       worker = Aquanaut::Worker.new(target)
       uri = URI.parse(target)
 
-      expect(worker.links(uri)).to be_empty
+      expect(worker.links(uri).first).to be_empty
     end
 
     it "rejects links that lead to a timeout" do
@@ -254,7 +254,7 @@ describe Aquanaut::Worker do
       worker = Aquanaut::Worker.new(target)
       uri = URI.parse(target)
 
-      expect(worker.links(uri)).to be_empty
+      expect(worker.links(uri).first).to be_empty
     end
 
     it "rejects links that have already been grabbed" do
@@ -274,7 +274,7 @@ describe Aquanaut::Worker do
       uri = URI.parse(target)
 
       result = [URI.parse('http://www.example.com/home.html')]
-      expect(worker.links(uri)).to eq(result)
+      expect(worker.links(uri).first).to eq(result)
     end
   end
 

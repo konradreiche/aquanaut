@@ -10,5 +10,11 @@ module Aquanaut
       super()
     end
 
+    def display
+      part = "#{@uri.path}#{@uri.query}#{@uri.fragment}"
+      part = @uri.to_s if part.empty?
+      return part
+    end
+
   end
 end

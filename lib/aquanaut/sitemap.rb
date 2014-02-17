@@ -3,7 +3,7 @@ require 'slim'
 
 class Aquanaut::Sitemap
 
-  def initialize(graph, domain, target_dir='sitemap')
+  def initialize(graph, domain, target_dir="#{Dir.pwd}/sitemap")
     @graph = graph
     @domain = domain
     @target_dir = target_dir
@@ -16,8 +16,9 @@ class Aquanaut::Sitemap
   def render_results
     initialize_target_directory
 
+    options = { disable_escape: true }
     template_path = File.expand_path('../templates/index.html.slim', __FILE__)
-    rendered_template = Slim::Template.new(template_path).render(self)
+    rendered_template = Slim::Template.new(template_path, options).render(self)
 
     File.open("#{@target_dir}/index.html", 'w') do |file|
       file.write rendered_template
@@ -32,6 +33,10 @@ class Aquanaut::Sitemap
     # copy vendor assets
     vendor_dir = File.expand_path('../../../vendor/assets', __FILE__)
     FileUtils.cp_r(vendor_dir, @target_dir, remove_destination: true)
+
+    # copy local assets
+    assets_dir = File.expand_path('../templates/assets', __FILE__)
+    FileUtils.cp_r(assets_dir, @target_dir)
   end
 
 end

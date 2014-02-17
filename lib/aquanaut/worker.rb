@@ -24,13 +24,14 @@ class Aquanaut::Worker
       uri = @queue.shift  # dequeue
 
       @visited[uri] = true
+      puts "Visit #{uri}"
 
-      links = links(uri)
+      links, assets = links(uri)
       links.each do |link|
         @queue.push(link) unless @visited[link]  # enqueue
       end
 
-      yield uri, links if block_given?
+      yield uri, links, assets if block_given?
     end
   end
 
@@ -42,7 +43,20 @@ class Aquanaut::Worker
   #
   def links(uri)
     page = @agent.get(uri)
-    page.links.map do |link|
+    return [] unless page.is_a?(Mechanize::Page)
+
+    assets = page.images.map do |image|
+      uri = URI.join(page.uri, image.url)
+      { 'uri' => uri, 'type' => 'image' }
+    end
+
+    page.parser.css('link[rel="stylesheet"]').each do |stylesheet|
+      uri = URI.join(page.uri, stylesheet['href'])
+      asset = { 'uri' => uri, 'type' => 'styleshet' }
+      assets << asset
+    end
+
+    links = page.links.map do |link|
       begin
         next if link.uri.nil?
         reference = URI.join(page.uri, link.uri)
@@ -51,19 +65,22 @@ class Aquanaut::Worker
         header = @agent.head(reference)
 
         location = header.uri
-        next unless internal?(location)
+        next if not internal?(location) or not header.is_a?(Mechanize::Page)
 
         @grabbed[reference] = true
         @grabbed[location] = true
         
         location
-      rescue Mechanize::Error, URI::InvalidURIError,  # swallow
-        Net::HTTP::Persistent::Error  # Timeout
+      rescue Mechanize::Error, URI::InvalidURIError,
+        Net::HTTP::Persistent::Error, Net::OpenTimeout, Net::ReadTimeout
         next
       end
     end.compact
-  rescue Mechanize::Error
-    []  # swallow
+
+    return links, assets
+  rescue Mechanize::Error, Net::OpenTimeout, Net::ReadTimeout,
+    Net::HTTP::Persistent::Error
+    return [], []  # swallow
   end
 
   # Evaluates if a link stays in the initial domain.

@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require 'aquanaut'
+
+if ARGV.empty?
+  raise ArgumentError, "Specify a target domain in the first argument"
+end
+
+target_domain = ARGV[0]
+
+if target_domain =~ URI::regexp
+  graph = Aquanaut.process_domain(target_domain)
+  Aquanaut::Sitemap.new(graph, target_domain).render_results
+else
+  raise ArgumentError, "#{target_domain} is not a valid URI"
+end
+

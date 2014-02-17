@@ -6,11 +6,24 @@ html lang="en"
     script type="text/javascript" src="assets/js/jquery-2.1.0.min.js"
     script type="text/javascript" src="assets/js/bootstrap.min.js"
     script type="text/javascript" src="assets/js/d3.v3.min.js"
+    script type="text/javascript" src="assets/js/graph.js"
+
+    script type="text/javascript"
+      | window.graph = #{@graph.to_json}
+
     link rel="stylesheet" href="assets/css/bootstrap.min.css"
-  body   
-    ul
-      - @graph.each do |node, adjacency|
-        li = node.uri.path
-        ul
-          - adjacency.each do |node|
-            li = node.uri.path
+    link rel="stylesheet" href="assets/css/custom.css"
+  body
+    div class="container"
+      h1 Sitemap for #{@domain}
+      h2 Visualized
+      div class="text-center" id="graph"
+      h2 Overview
+      ul
+        - @graph.select { |node, _| node.instance_of?(Aquanaut::PageNode) }.each do |node, adjacency|
+          li
+            a href="#{node.uri}" #{node.display}
+          ul
+            - adjacency.select { |node| node.instance_of?(Aquanaut::PageNode) }.each do |node|
+              li
+                a href="#{node.uri}" #{node.display}
