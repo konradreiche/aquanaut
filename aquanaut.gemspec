@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["konrad.reiche@gmail.com"]
   spec.summary       = %q{Aquanaut creates a sitemap dynamically based on a given domain.}
   spec.description   = %q{Aquanaut creates a sitemap dynamically based on a given domain.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/platzhirsch/aquanaut"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
