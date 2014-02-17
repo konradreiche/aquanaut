@@ -5,14 +5,16 @@ require 'aquanaut/sitemap'
 require 'aquanaut/version'
 require 'aquanaut/worker'
 
-# Main module
+# Main module of Aquanaut
 #
 module Aquanaut
   class << self
 
     # Processes the given target domain and creates a page and asset graph.
     #
-    # @param [String] target_adress
+    # @param [String] target_address
+    #
+    # @return [Graph] the sitemap graph with pages and static assets
     #
     def process_domain(target_address)
       worker = Worker.new(target_address)

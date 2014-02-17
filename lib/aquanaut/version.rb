@@ -1,3 +1,4 @@
 module Aquanaut
-  VERSION = "0.0.1"
+  # Version of this gem
+  VERSION = "0.1.0"
 end

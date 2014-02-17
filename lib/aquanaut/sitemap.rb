@@ -1,6 +1,10 @@
 require 'pathname'
 require 'slim'
 
+# The sitemap class is used to render the results in HTML and JavaScript.
+# 
+# Uses SLIM as a template engine.
+#
 class Aquanaut::Sitemap
 
   def initialize(graph, domain, target_dir="#{Dir.pwd}/sitemap")
@@ -13,6 +17,8 @@ class Aquanaut::Sitemap
     end
   end
 
+  # Renders the results by initiailizing the dependencies and processingt the template.
+  #
   def render_results
     initialize_target_directory
 
@@ -26,6 +32,13 @@ class Aquanaut::Sitemap
   end
 
   private
+
+  # There are several asset files required. Vendor asset files, but also local
+  # asset files. They need to the copied to the target directory in order to
+  # work properly.
+  #
+  # @private
+  #
   def initialize_target_directory
     # create result directory
     Dir.mkdir(@target_dir) unless Dir.exists?(@target_dir)

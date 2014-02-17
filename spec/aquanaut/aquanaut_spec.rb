@@ -40,8 +40,8 @@ describe Aquanaut do
       adjacency_list = [page_1_node, page_2_node]
       expect(root_node.adjacency_list).to eq(adjacency_list)
 
-      expect(page_1_node.adjacency_list).to be_empty
-      expect(page_2_node.adjacency_list).to be_empty
+      expect(page_1_node.adjacency_list).to eq(adjacency_list)
+      expect(page_2_node.adjacency_list).to eq(adjacency_list)
     end
   end
 

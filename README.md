@@ -1,6 +1,6 @@
 # Aquanaut
 
-TODO: Write a gem description
+A web crawler that stays on a given domain and creates a graph representing the different pages, static assets and how they are interlinke.
 
 ## Installation
 
@@ -18,7 +18,11 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Execute `aquanaut` and specify the domain on which it should be executed.
+
+    $ aquanaut 'http://www.konrad-reiche.com'
+
+The results are written into the directory `sitemap`.
 
 ## Contributing
 
@@ -26,4 +30,4 @@ TODO: Write usage instructions here
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+. Create new Pull Request

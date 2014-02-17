@@ -1,6 +1,8 @@
 require 'mechanize'
 require 'public_suffix'
 
+# The worker contains the actual crawling procedure.
+#
 class Aquanaut::Worker
 
   def initialize(target)
@@ -9,7 +11,6 @@ class Aquanaut::Worker
     @domain = PublicSuffix.parse(uri.host)
 
     @visited = Hash.new(false)
-    @grabbed = Hash.new(false)
 
     @agent = Mechanize.new do |agent|
       agent.open_timeout = 5
@@ -22,6 +23,7 @@ class Aquanaut::Worker
   def explore
     while not @queue.empty?
       uri = @queue.shift  # dequeue
+      next if @visited[uri]
 
       @visited[uri] = true
       puts "Visit #{uri}"
@@ -35,14 +37,20 @@ class Aquanaut::Worker
     end
   end
 
-  # Retrieves all links from a given page.
+  # Retrieves all links to pages and static assets from a given page. The
+  # decision whether a link points to an internal or external domain cannot be
+  # done by just exmaining the link's URL. Due to possible HTTP 3xx responses
+  # the link needs to be resolved. Hence, each link is processed through a HTTP
+  # HEAD request to retrieve the final location.
   #
   # @param uri [URI] the URI from which the page is retrieved.
   #
-  # @return [Array<URI>] list of links found on the given page.
+  # @return [Array<URI>, Array<Hash>] list of links and static assets found on
+  #                                   the given page.
   #
   def links(uri)
     page = @agent.get(uri)
+    grabbed = Hash.new(false)
     return [] unless page.is_a?(Mechanize::Page)
 
     assets = page.images.map do |image|
@@ -61,15 +69,15 @@ class Aquanaut::Worker
         next if link.uri.nil?
         reference = URI.join(page.uri, link.uri)
 
-        next if @grabbed[reference]
+        next if grabbed[reference]
         header = @agent.head(reference)
 
         location = header.uri
         next if not internal?(location) or not header.is_a?(Mechanize::Page)
 
-        @grabbed[reference] = true
-        @grabbed[location] = true
-        
+        grabbed[reference] = true
+        grabbed[location] = true
+
         location
       rescue Mechanize::Error, URI::InvalidURIError,
         Net::HTTP::Persistent::Error, Net::OpenTimeout, Net::ReadTimeout
